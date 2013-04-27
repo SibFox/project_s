@@ -1,0 +1,30 @@
+unit UnitMain;
+
+interface
+
+uses
+  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.ExtCtrls;
+
+type
+  TForm_Main = class(TForm)
+    Image1: TImage;
+  private
+    { Private declarations }
+  public
+    { Public declarations }
+  end;
+
+var
+  Form_Main: TForm_Main;
+
+implementation
+
+{$R *.dfm}
+
+procedure PrepareForm_1;
+begin
+  FormMain
+end;
+
+end.
