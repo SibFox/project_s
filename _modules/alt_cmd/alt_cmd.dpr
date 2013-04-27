@@ -2,7 +2,9 @@ program alt_cmd;
 
 uses
   Vcl.Forms,
-  UnitMain in 'UnitMain.pas' {FormMain};
+  UnitMain in 'UnitMain.pas' {FormMain},
+  UnitDraw in 'UnitDraw.pas',
+  UnitBuffer in 'UnitBuffer.pas';
 
 {$R *.res}
 

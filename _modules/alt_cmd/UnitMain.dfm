@@ -1,6 +1,8 @@
 object FormMain: TFormMain
   Left = 0
   Top = 0
+  AlphaBlend = True
+  AlphaBlendValue = 245
   BorderStyle = bsNone
   Caption = 'alt_cmd'
   ClientHeight = 365
@@ -8,18 +10,21 @@ object FormMain: TFormMain
   Color = 4079166
   Font.Charset = DEFAULT_CHARSET
   Font.Color = 14540253
-  Font.Height = -12
+  Font.Height = -11
   Font.Name = 'Consolas'
   Font.Style = []
   OldCreateOrder = False
   OnCreate = FormCreate
+  OnKeyPress = FormKeyPress
+  OnMouseWheelDown = FormMouseWheelDown
+  OnMouseWheelUp = FormMouseWheelUp
   PixelsPerInch = 96
-  TextHeight = 14
+  TextHeight = 13
   object PanelCmd: TPanel
     Left = 0
-    Top = 26
+    Top = 21
     Width = 514
-    Height = 339
+    Height = 344
     Align = alClient
     BevelOuter = bvNone
     Color = 5197647
@@ -30,25 +35,25 @@ object FormMain: TFormMain
     ExplicitWidth = 345
     ExplicitHeight = 234
     object ImgCmd: TImage
-      Left = 8
-      Top = 8
-      Width = 255
-      Height = 191
+      Left = 6
+      Top = 6
+      Width = 217
+      Height = 169
     end
   end
-  object Panel1: TPanel
+  object PanelHat: TPanel
     Left = 0
     Top = 0
     Width = 514
-    Height = 26
+    Height = 21
     Align = alTop
     BevelOuter = bvNone
     Caption = 'alt_cmd'
     Color = 4144959
     ParentBackground = False
     TabOrder = 1
-    OnMouseDown = Panel1MouseDown
-    OnMouseUp = Panel1MouseUp
+    OnMouseDown = PanelHatMouseDown
+    OnMouseUp = PanelHatMouseUp
   end
   object Timer_FormMove: TTimer
     Enabled = False
@@ -56,5 +61,12 @@ object FormMain: TFormMain
     OnTimer = Timer_FormMoveTimer
     Left = 408
     Top = 48
+  end
+  object Timer_CursorUpd: TTimer
+    Enabled = False
+    Interval = 380
+    OnTimer = Timer_CursorUpdTimer
+    Left = 409
+    Top = 117
   end
 end
