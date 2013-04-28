@@ -5,8 +5,8 @@ object FormMain: TFormMain
   AlphaBlendValue = 245
   BorderStyle = bsNone
   Caption = 'alt_cmd'
-  ClientHeight = 365
-  ClientWidth = 514
+  ClientHeight = 404
+  ClientWidth = 515
   Color = 4079166
   Font.Charset = DEFAULT_CHARSET
   Font.Color = 14540253
@@ -23,8 +23,8 @@ object FormMain: TFormMain
   object PanelCmd: TPanel
     Left = 0
     Top = 21
-    Width = 514
-    Height = 344
+    Width = 515
+    Height = 383
     Align = alClient
     BevelOuter = bvNone
     Color = 5197647
@@ -34,17 +34,52 @@ object FormMain: TFormMain
     ExplicitTop = 39
     ExplicitWidth = 345
     ExplicitHeight = 234
+    DesignSize = (
+      515
+      383)
     object ImgCmd: TImage
-      Left = 6
-      Top = 6
-      Width = 217
-      Height = 169
+      Left = 2
+      Top = 2
+      Width = 499
+      Height = 367
+      Anchors = [akLeft, akTop, akRight, akBottom]
+    end
+    object imgScrollY: TImage
+      Left = 503
+      Top = 0
+      Width = 12
+      Height = 372
+      Align = alCustom
+      Anchors = [akTop, akRight, akBottom]
+      ExplicitLeft = 502
+      ExplicitHeight = 333
+    end
+    object imgScrollX: TImage
+      Left = 1
+      Top = 371
+      Width = 503
+      Height = 12
+      Align = alCustom
+      Anchors = [akRight, akBottom]
+      ExplicitLeft = 0
+      ExplicitTop = 332
+    end
+    object ShapeResizeForm: TShape
+      Left = 503
+      Top = 371
+      Width = 12
+      Height = 12
+      Anchors = [akRight, akBottom]
+      Brush.Color = 2631720
+      Pen.Color = 2631720
+      OnMouseDown = ShapeResizeFormMouseDown
+      OnMouseUp = ShapeResizeFormMouseUp
     end
   end
   object PanelHat: TPanel
     Left = 0
     Top = 0
-    Width = 514
+    Width = 515
     Height = 21
     Align = alTop
     BevelOuter = bvNone
@@ -52,21 +87,30 @@ object FormMain: TFormMain
     Color = 4144959
     ParentBackground = False
     TabOrder = 1
+    OnDblClick = PanelHatDblClick
     OnMouseDown = PanelHatMouseDown
     OnMouseUp = PanelHatMouseUp
+    ExplicitWidth = 514
   end
   object Timer_FormMove: TTimer
     Enabled = False
     Interval = 20
     OnTimer = Timer_FormMoveTimer
-    Left = 408
-    Top = 48
+    Left = 416
+    Top = 56
   end
   object Timer_CursorUpd: TTimer
     Enabled = False
     Interval = 380
     OnTimer = Timer_CursorUpdTimer
-    Left = 409
-    Top = 117
+    Left = 425
+    Top = 245
+  end
+  object Timer_FormResize: TTimer
+    Enabled = False
+    Interval = 20
+    OnTimer = Timer_FormResizeTimer
+    Left = 416
+    Top = 112
   end
 end

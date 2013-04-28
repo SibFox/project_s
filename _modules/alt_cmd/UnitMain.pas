@@ -13,6 +13,10 @@ type
     PanelHat: TPanel;
     Timer_FormMove: TTimer;
     Timer_CursorUpd: TTimer;
+    imgScrollY: TImage;
+    imgScrollX: TImage;
+    Timer_FormResize: TTimer;
+    ShapeResizeForm: TShape;
     procedure FormCreate(Sender: TObject);
     procedure PanelHatMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
     procedure PanelHatMouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
@@ -21,6 +25,10 @@ type
     procedure FormKeyPress(Sender: TObject; var Key: Char);
     procedure FormMouseWheelUp(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
     procedure FormMouseWheelDown(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
+    procedure Timer_FormResizeTimer(Sender: TObject);
+    procedure ShapeResizeFormMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+    procedure ShapeResizeFormMouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+    procedure PanelHatDblClick(Sender: TObject);
   private
     { Private declarations }
   public
@@ -30,16 +38,19 @@ type
 var
   FormMain: TFormMain;
   //+ View params
-    delta_pixw : integer = 4;
     color_bg : array[0..0] of TColor = (ClBlack);
     windowposdef_x : integer = 10;
     windowposdef_y : integer = 10;
     FontSizes : array[0..19] of integer = (1, 6, 7, 8, 9, 10, 11, 12, 13, 14, 16, 18, 22, 24, 32, 36, 42, 48, 60, 72);
     curfontsize : integer = 4;
   //-
-  //+ Moving form
+  //+ Moving & resizing form
     windowpos_mdx : integer;
     windowpos_mdy : integer;
+    window_oldx, window_oldy, window_oldw, window_oldh : integer;
+    window_minw : integer = 120;
+    window_minh : integer = 80;
+    window_state : integer = 0; //0 - windowed, 1 - allclient, 2 - fullscreen
   //-
   //+ Buffers
     buff_current : integer; //Номер текущего буффера
@@ -61,6 +72,9 @@ end;
 //+ Moving form
   procedure MoveForm_Start;
   begin
+    if window_state <> 0 then begin
+      exit;
+    end;
     windowpos_mdx := FormMain.Left - Mouse.CursorPos.X;
     windowpos_mdy := FormMain.Top - Mouse.CursorPos.Y;
     FormMain.Timer_FormMove.Enabled := true;
@@ -78,23 +92,106 @@ end;
   end;
 //-
 
+//+ Resizing form
+  procedure ResizeComplete;
+  begin
+    FormMain.ImgCmd.Picture.Graphic.Width := FormMain.ImgCmd.Width;
+    FormMain.ImgCmd.Picture.Graphic.Height := FormMain.ImgCmd.Height;
+    UnitDraw.DrawBuffer(buff_current, FormMain.ImgCmd, 0, 0);
+    UnitDraw.Cursor_Draw(Formmain.ImgCmd.Canvas, cur.phase);
+  end;
+
+  procedure ResizeForm_AlClient;
+  begin
+    window_state := 1;
+    FormMain.ShapeResizeForm.Hide;
+    window_oldx := FormMain.Left;
+    window_oldy := FormMain.Top;
+    window_oldw := FormMain.Width;
+    window_oldh := FormMain.Height;
+    Application.ProcessMessages;
+    FormMain.Align := alClient;
+    FormMain.ShapeResizeForm.Show;
+    ResizeComplete;
+  end;
+
+  procedure ResizeForm_AlFullScreen;
+  begin
+    window_state := 2;
+    FormMain.ShapeResizeForm.Hide;
+    FormMain.Align := alNone;
+    window_oldx := FormMain.Left;
+    window_oldy := FormMain.Top;
+    window_oldw := FormMain.Width;
+    window_oldh := FormMain.Height;
+    FormMain.Left := 0;
+    FormMain.Top := 0;
+    FormMain.Width := Screen.Width;
+    FormMain.Height := Screen.Height;
+    FormMain.ShapeResizeForm.Show;
+    ResizeComplete;
+  end;
+
+  procedure ResizeForm_AlWindow;
+  begin
+    window_state := 0;
+    FormMain.ShapeResizeForm.Hide;
+    FormMain.Align := alNone;
+    FormMain.Left := window_oldx;
+    FormMain.Top := window_oldy;
+    FormMain.Width := window_oldw;
+    FormMain.Height := window_oldh;
+    FormMain.ShapeResizeForm.Show;
+    ResizeComplete;
+  end;
+
+  procedure ResizeForm_Start;
+  begin
+    windowpos_mdx := FormMain.Left + FormMain.Width - Mouse.CursorPos.X;
+    windowpos_mdy := FormMain.Top + FormMain.height - Mouse.CursorPos.Y;
+    FormMain.Timer_FormResize.Enabled := true;
+  end;
+
+  procedure ResizeForm_Do;
+  begin
+    if (Mouse.CursorPos.X + windowpos_mdx - FormMain.Left > window_minw) then begin
+      FormMain.Width := Mouse.CursorPos.X + windowpos_mdx - FormMain.Left;
+    end else begin
+      FormMain.Width := window_minw;
+    end;
+    if (Mouse.CursorPos.Y + windowpos_mdy - FormMain.Top > window_minh) then begin
+      FormMain.Height := Mouse.CursorPos.Y + windowpos_mdy - FormMain.Top;
+    end else begin
+      FormMain.Height := window_minh;
+    end;
+  end;
+
+  procedure ResizeForm_Stop;
+  begin
+    FormMain.Timer_FormResize.Enabled := false;
+    ResizeComplete;
+  end;
+//-
+
 procedure Init_1;
 begin
+  randomize;
   FormMain.Left := windowposdef_x;
   FormMain.Top := windowposdef_y;
-  FormMain.ImgCmd.Left := delta_pixw;
-  FormMain.ImgCmd.Top := 0;
-  FormMain.ImgCmd.Width := FormMain.PanelCmd.Width - delta_pixw * 2;
-  FormMain.ImgCmd.Height := FormMain.PanelCmd.Height - delta_pixw;
   //+ Color set
     FormMain.ImgCmd.Canvas.Brush.Color := color_bg[0];
     FormMain.ImgCmd.Canvas.Pen.Color := color_bg[0];
     FormMain.ImgCmd.Canvas.Rectangle(0, 0, FormMain.ImgCmd.Width, FormMain.ImgCmd.Height);
-    FormMain.PanelCmd.Color := FormMain.PanelHat.Color;
+    FormMain.PanelCmd.Color := color_bg[0];
   //-
   //+ Font set
     FormMain.ImgCmd.Canvas.Font := FormMain.Font;
     FormMain.ImgCmd.Canvas.Font.Size := FontSizes[curfontsize];
+    window_oldx := FormMain.Left;
+    window_oldy := FormMain.Top;
+    window_oldw := FormMain.Width;
+    window_oldh := FormMain.Height;
+    //FormMain.DoubleBuffered := true;
   //-
 end;
 
@@ -155,10 +252,16 @@ end;
 procedure WindowAlphaUp;
 begin
   FormMain.AlphaBlendValue := Min(255, FormMain.AlphaBlendValue + 10);
+  if FormMain.AlphaBlendValue = 255 then begin
+    FormMain.AlphaBlend := false;
+  end else begin
+    FormMain.AlphaBlend := true;
+  end;
 end;
 
 procedure WindowAlphaDown;
 begin
+  FormMain.AlphaBlend := true;
   FormMain.AlphaBlendValue := Max(10, FormMain.AlphaBlendValue - 10);
 end;
 //-
@@ -187,6 +290,15 @@ begin
   end;
 end;
 
+procedure TFormMain.PanelHatDblClick(Sender: TObject);
+begin
+  if window_state = 0 then begin
+    ResizeForm_AlClient;
+  end else begin
+    ResizeForm_AlWindow;
+  end;
+end;
+
 procedure TFormMain.PanelHatMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
 begin
   MoveForm_Start;
@@ -195,6 +307,16 @@ end;
 procedure TFormMain.PanelHatMouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
 begin
   MoveForm_Stop;
+end;
+
+procedure TFormMain.ShapeResizeFormMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+begin
+  ResizeForm_Start;
+end;
+
+procedure TFormMain.ShapeResizeFormMouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+begin
+  ResizeForm_Stop;
 end;
 
 procedure TFormMain.Timer_CursorUpdTimer(Sender: TObject);
@@ -206,6 +328,11 @@ end;
 procedure TFormMain.Timer_FormMoveTimer(Sender: TObject);
 begin
   MoveForm_Do;
+end;
+
+procedure TFormMain.Timer_FormResizeTimer(Sender: TObject);
+begin
+  ResizeForm_Do;
 end;
 
 end.

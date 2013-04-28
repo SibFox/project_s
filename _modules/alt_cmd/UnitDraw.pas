@@ -53,15 +53,22 @@ uses
   var
     i, j : int64;
   begin
+    img.Canvas.Brush.Style := bsSolid;
     img.Canvas.Brush.Color := CurColorScheme.colors_bg[0];
     img.Canvas.Pen.Color := CurColorScheme.colors_bg[0];
     img.Canvas.Rectangle(0, 0, img.Width, img.Height);
+    img.Canvas.Brush.Style := bsClear;
     i := start_y;
     while (i < UnitBuffer.buffs[buffnum].len_y) and (i <= (img.Height div GetTextHeight(img.Canvas)) + 1) do begin
       j := start_x;
       while (j < UnitBuffer.buffs[buffnum].len_x[i]) and (j <= (img.Width div GetTextWidth(img.Canvas)) + 1) do begin
         img.Canvas.Font.Color := CurColorScheme.colors_fg[UnitBuffer.buffs[buffnum].symbols[i][j].color_fg];
-        img.Canvas.Brush.Color := CurColorScheme.colors_bg[UnitBuffer.buffs[buffnum].symbols[i][j].color_bg];
+        if UnitBuffer.buffs[buffnum].symbols[i][j].color_bg <> 0 then begin
+          img.Canvas.Brush.Color := CurColorScheme.colors_bg[UnitBuffer.buffs[buffnum].symbols[i][j].color_bg];
+          img.Canvas.Brush.Style := bsSolid;
+        end else begin
+          img.Canvas.Brush.Style := bsClear;
+        end;
         img.Canvas.TextOut((j - start_x) * GetTextWidth(img.Canvas),  (i - start_y) * (-img.Canvas.Font.Height + delta_stry), UnitBuffer.buffs[buffnum].symbols[i][j].symb);
         inc(j);
       end;
@@ -114,6 +121,11 @@ uses
     begin
       FormMain.ImgCmd.Canvas.Brush.Color := cur.color_bg[phase];
       FormMain.ImgCmd.Canvas.Pen.Color := cur.color_fg[phase];
+      if phase = 0 then begin
+        canv.Brush.Style := bsClear;
+      end else begin
+        canv.Brush.Style := bsSolid;
+      end;
       FormMain.ImgCmd.Canvas.Rectangle(
         GetTextWidth(canv) * cur.x,
         (GetTextHeight(canv)) * (cur.y + 1) - cur.height[phase],
